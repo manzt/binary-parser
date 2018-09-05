@@ -28,16 +28,15 @@
     "bit"
   ],
   "author": {
-    "name": "Keichi Takahashi",
-    "email": "keichi.t@me.com",
-    "url": "https://keichi.net/"
+    "name": "Colin Diesh",
+    "email": "colin.diesh@gmail.com"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "http://github.com/keichi/binary-parser.git"
+    "url": "http://github.com/GMOD/binary-parser.git"
   },
-  "bugs": "http://github.com/keichi/binary-parser/issues",
+  "bugs": "http://github.com/GMOD/binary-parser/issues",
   "dependencies": {
     "long": "^4.0.0"
   },
