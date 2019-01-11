@@ -5,7 +5,7 @@
   "main": "lib/binary_parser.js",
   "devDependencies": {
     "istanbul": "^0.4.5",
-    "mocha": "^3.5.3",
+    "jest": "^23.6.0",
     "opn-cli": "^3.1.0",
     "prettier": "^1.9.2",
     "webpack": "^4.6.0",
@@ -14,7 +14,7 @@
   "scripts": {
     "fmt": "npx prettier --write '{lib,test,example}/**/*.js'",
     "check-fmt": "npx prettier --list-different '{lib,test,example}/**/*.js'",
-    "test": "npx mocha --reporter spec",
+    "test": "npx jest",
     "cover": "npx istanbul cover --report html node_modules/.bin/_mocha",
     "test-webpack": "npx webpack --config test/browser/webpack.config.js && opn test/browser/run-mocha.html"
   },
