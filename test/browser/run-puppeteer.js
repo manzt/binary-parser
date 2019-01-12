@@ -27,9 +27,9 @@ return puppeteer
                       window.mocha.failures === 0 &&
                       window.mocha.tests === window.mocha.passes
                     ) {
-                      res();
+                      res(window.mocha.stats);
                     } else {
-                      rej();
+                      rej(window.mocha.stats);
                     }
                   }
                 }, 500);
@@ -39,12 +39,14 @@ return puppeteer
       })
   )
   .then(
-    () => {
+    (res) => {
       browser.close();
+      console.log('success', JSON.stringify(res))
       process.exit(0);
     },
-    () => {
+    (err) => {
       browser.close();
+      console.log('failure', JSON.stringify(err))
       process.exit(1);
     }
   );
