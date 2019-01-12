@@ -215,12 +215,14 @@ describe("Composite parser", function() {
       });
     });
     it("should parse until function returns true when readUntil is function (using read-ahead)", function() {
-      var parser = Parser.start().endianess("big").array("data", {
-        readUntil: function(item, buf) {
-          return buf.length > 0 && buf.readUInt8(0) === 0;
-        },
-        type: "uint8"
-      });
+      var parser = Parser.start()
+        .endianess("big")
+        .array("data", {
+          readUntil: function(item, buf) {
+            return buf.length > 0 && buf.readUInt8(0) === 0;
+          },
+          type: "uint8"
+        });
 
       var buffer = Buffer.from([
         0xff,
@@ -404,7 +406,9 @@ describe("Composite parser", function() {
         },
         choices: {
           1: Parser.start().uint8("v1"),
-          2: Parser.start().endianess("big").uint16("v2")
+          2: Parser.start()
+            .endianess("big")
+            .uint16("v2")
         }
       });
 
@@ -1000,7 +1004,8 @@ describe("Composite parser", function() {
     it("Parse uint8", function() {
       var buffer = Buffer.from([0, 1, 0, 4]);
       for (var i = 17; i <= 24; i++) {
-        var parser = Parser.start().endianess('big')
+        var parser = Parser.start()
+          .endianess("big")
           [`bit${i}`]("a")
           .uint8("b");
 

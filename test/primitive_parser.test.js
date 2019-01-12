@@ -220,7 +220,8 @@ describe("Primitive parser", function() {
     });
     it("should parse nested bit fields", function() {
       var parser = new Parser().bit1("a").nest("x", {
-        type: new Parser().endianess("big")
+        type: new Parser()
+          .endianess("big")
           .bit2("b")
           .bit4("c")
           .bit1("d")
