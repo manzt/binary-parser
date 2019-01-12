@@ -16,9 +16,7 @@ return puppeteer
         page.on("console", msg => {
           console.log(msg.text());
         });
-        console.log('here')
-        console.log(`file:${path.join(__dirname, "run-mocha.html")}`)
-        await page.goto(`file:${path.join(__dirname, "run-mocha.html")}`);
+        await page.goto(process.argv[2] || `file:${path.join(__dirname, "run-mocha.html")}`);
         return page
           .evaluate(
             () =>

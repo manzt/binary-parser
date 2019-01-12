@@ -1,7 +1,10 @@
 language: node_js
 node_js:
   - '8'
+before_script:
+  - python -m SimpleHTTPServer & sleep 2
 script:
   - yarn lint
   - yarn test
-  - node test/browser/run-puppeteer.js
+  - yarn test-webpack http://localhost:8000/test/browser/run-mocha.html
+
