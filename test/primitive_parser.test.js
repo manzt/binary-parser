@@ -1,5 +1,4 @@
 var assert = require("assert");
-var util = require("util");
 var Parser = require("../lib/binary_parser").Parser;
 
 describe("Primitive parser", function() {
@@ -17,7 +16,11 @@ describe("Primitive parser", function() {
         .uint32be("c");
 
       var buffer = Buffer.from([0x00, 0xd2, 0x04, 0x00, 0xbc, 0x61, 0x4e]);
-      assert.deepEqual(parser.parse(buffer).result, { a: 0, b: 1234, c: 12345678 });
+      assert.deepEqual(parser.parse(buffer).result, {
+        a: 0,
+        b: 1234,
+        c: 12345678
+      });
     });
     it("should use formatter to transform parsed integer", function() {
       var parser = Parser.start()
@@ -28,7 +31,7 @@ describe("Primitive parser", function() {
         })
         .int16le("b", {
           formatter: function(val) {
-            return "test" + String(val);
+            return `test${String(val)}`;
           }
         });
 
@@ -99,7 +102,11 @@ describe("Primitive parser", function() {
         0x61,
         0x4e
       ]);
-      assert.deepEqual(parser.parse(buffer).result, { a: 0, b: 1234, c: 12345678 });
+      assert.deepEqual(parser.parse(buffer).result, {
+        a: 0,
+        b: 1234,
+        c: 12345678
+      });
     });
   });
 

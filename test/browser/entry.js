@@ -1,2 +1,2 @@
-require('../primitive_parser')
-require('../composite_parser')
+require("../primitive_parser.test.js");
+require("../composite_parser.test.js");

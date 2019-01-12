@@ -1,5 +1,4 @@
 var assert = require("assert");
-var util = require("util");
 var Parser = require("../lib/binary_parser").Parser;
 
 describe("Composite parser", function() {
@@ -138,9 +137,10 @@ describe("Composite parser", function() {
         });
 
       var buffer = Buffer.alloc(1 + 10 * (1 + 5 * 4));
-      var i, j;
+      var i;
+      var j;
 
-      iterator = 0;
+      var iterator = 0;
       buffer.writeUInt8(10, iterator);
       iterator += 1;
       for (i = 0; i < 10; i++) {
@@ -192,7 +192,7 @@ describe("Composite parser", function() {
     });
     it("should parse until function returns true when readUntil is function", function() {
       var parser = Parser.start().array("data", {
-        readUntil: function(item, buf) {
+        readUntil: function(item) {
           return item === 0;
         },
         type: "uint8"
@@ -467,7 +467,7 @@ describe("Composite parser", function() {
         })
         .int32le("test");
 
-      buffer = Buffer.from([0x03, 0xff, 0x2f, 0xcb, 0x04, 0x0]);
+      var buffer = Buffer.from([0x03, 0xff, 0x2f, 0xcb, 0x04, 0x0]);
       assert.deepEqual(parser.parse(buffer).result, {
         tag: 3,
         data: 0xff,
@@ -576,8 +576,10 @@ describe("Composite parser", function() {
     it("should be able to refer to other parsers by name", function() {
       var parser = Parser.start().namely("self");
 
+      // eslint-disable-next-line
       var stop = Parser.start().namely("stop");
 
+      // eslint-disable-next-line
       var twoCells = Parser.start()
         .namely("twoCells")
         .nest("left", { type: "self" })
@@ -873,7 +875,7 @@ describe("Composite parser", function() {
       var personParser = new Parser().nest("name", {
         type: nameParser,
         formatter: function(name) {
-          return name.firstName + " " + name.lastName;
+          return `${name.firstName} ${name.lastName}`;
         }
       });
 
@@ -907,8 +909,8 @@ describe("Composite parser", function() {
   });
 
   describe("Buffer parser", function() {
-    //this is a test for testing a fix of a bug, that removed the last byte of the
-    //buffer parser
+    // this is a test for testing a fix of a bug, that removed the last byte of the
+    // buffer parser
     it("should return a buffer with same size", function() {
       var bufferParser = new Parser().buffer("buf", {
         readUntil: "eof",
@@ -937,7 +939,7 @@ describe("Composite parser", function() {
         });
 
       var buffer = Buffer.from("John Doe\0");
-      var person = parser.parse(buffer).result
+      var person = parser.parse(buffer).result;
       assert.ok(person instanceof Person);
       assert.equal(person.name, "John Doe");
     });
@@ -999,14 +1001,13 @@ describe("Composite parser", function() {
       var buffer = Buffer.from([0, 1, 0, 4]);
       for (var i = 17; i <= 24; i++) {
         var parser = Parser.start()
-          ["bit" + i]("a")
+          [`bit${i}`]("a")
           .uint8("b");
 
         assert.deepEqual(parser.parse(buffer).result, {
           a: 1 << (i - 16),
           b: 4
         });
-
       }
     });
   });
