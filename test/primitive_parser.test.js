@@ -133,6 +133,7 @@ describe("Primitive parser", function() {
 
     it("should parse 1-byte-length bit field sequence", function() {
       var parser = new Parser()
+        .endianess("big")
         .bit1("a")
         .bit2("b")
         .bit4("c")
@@ -162,6 +163,7 @@ describe("Primitive parser", function() {
     });
     it("should parse 2-byte-length bit field sequence", function() {
       var parser = new Parser()
+        .endianess("big")
         .bit3("a")
         .bit9("b")
         .bit4("c");
@@ -186,6 +188,7 @@ describe("Primitive parser", function() {
     });
     it("should parse 4-byte-length bit field sequence", function() {
       var parser = new Parser()
+        .endianess("big")
         .bit1("a")
         .bit24("b")
         .bit4("c")
@@ -207,7 +210,7 @@ describe("Primitive parser", function() {
         .bit4("c")
         .bit2("d")
         .bit1("e");
-      assert.deepEqual(parser.parse(buf), {
+      assert.deepEqual(parser.parse(buf).result, {
         a: 1,
         b: 11184829,
         c: 10,
@@ -217,7 +220,7 @@ describe("Primitive parser", function() {
     });
     it("should parse nested bit fields", function() {
       var parser = new Parser().bit1("a").nest("x", {
-        type: new Parser()
+        type: new Parser().endianess("big")
           .bit2("b")
           .bit4("c")
           .bit1("d")

@@ -10,4 +10,4 @@ Binary-parser can be installed with [npm](https://npmjs.org/):
 $ npm install @gmod/binary-parser
 ```
 
-
+Important! Default this library is default little endian instead instead of big endian while https://github.com/keichi/binary-parser is default big endian
