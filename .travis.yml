@@ -4,3 +4,4 @@ node_js:
 script:
   - yarn lint
   - yarn test
+  - node test/browser/run-puppeteer.js
