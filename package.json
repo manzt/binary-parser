@@ -6,13 +6,12 @@
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
-    "babel-eslint": "^8.2.2",
+    "babel-eslint": "^10.0.1",
     "babel-jest": "^23.0.1",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.6.1",
     "babel-preset-flow": "^6.23.0",
     "babel-preset-stage-2": "^6.24.1",
-    "babel-eslint": "^10.0.1",
     "eslint": "^4.19.1",
     "eslint-config-airbnb-base": "^12.1.0",
     "eslint-config-prettier": "^2.9.0",
@@ -22,10 +21,11 @@
     "eslint-plugin-prettier": "^2.6.0",
     "istanbul": "^0.4.5",
     "jest": "^23.6.0",
+    "mocha-puppeteer": "^0.13.0",
     "opn-cli": "^3.1.0",
     "prettier": "^1.9.2",
-    "webpack": "^4.6.0",
-    "webpack-cli": "^2.0.15"
+    "webpack": "^4.28.4",
+    "webpack-cli": "^3.2.1"
   },
   "scripts": {
     "test": "npx jest",
@@ -54,7 +54,8 @@
   },
   "bugs": "http://github.com/GMOD/binary-parser/issues",
   "dependencies": {
-    "long": "^4.0.0"
+    "long": "^4.0.0",
+    "mocha": "^5.2.0"
   },
   "engines": {
     "node": ">=5.10.0"
