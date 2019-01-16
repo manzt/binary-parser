@@ -21,6 +21,7 @@
     "eslint-plugin-prettier": "^2.6.0",
     "istanbul": "^0.4.5",
     "jest": "^23.6.0",
+    "mocha": "^5.2.0",
     "opn-cli": "^3.1.0",
     "prettier": "^1.9.2",
     "puppeteer": "^1.11.0",
@@ -54,8 +55,7 @@
   },
   "bugs": "http://github.com/GMOD/binary-parser/issues",
   "dependencies": {
-    "long": "^4.0.0",
-    "mocha": "^5.2.0"
+    "long": "^4.0.0"
   },
   "engines": {
     "node": ">=5.10.0"
