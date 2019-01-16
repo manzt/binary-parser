@@ -1,5 +1,7 @@
 # binary-parser
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/GMOD/binary-parser.svg)](https://greenkeeper.io/)
+
 @gmod/binary-parser is a fork of https://github.com/keichi/binary-parser that also handles 64-bit longs and itf8 and ltf8 types
 
 ## Installation
