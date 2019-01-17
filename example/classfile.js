@@ -1,4 +1,5 @@
 var Parser = require("../lib/binary_parser").Parser;
+var util = require("util");
 
 var ConstantClassInfo = Parser.start().uint16be("name_index");
 
@@ -36,6 +37,7 @@ var ConstantUtf8Info = Parser.start()
   .uint16be("len")
   .string("bytes", { length: "len" });
 
+// eslint-disable-next-line
 var ConstantMethodHandleInfo = Parser.start()
   .uint8("reference_kind")
   .uint16be("reference_index");
@@ -81,5 +83,5 @@ var ClassFile = Parser.start()
   });
 
 require("fs").readFile("Hello.class", function(err, data) {
-  console.log(require("util").inspect(ClassFile.parse(data), { depth: null }));
+  console.log(util.inspect(ClassFile.parse(data), { depth: null }));
 });

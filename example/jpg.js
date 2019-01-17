@@ -1,4 +1,5 @@
 var Parser = require("../lib/binary_parser").Parser;
+var util = require("util");
 
 var SOI = Parser.start();
 
@@ -25,6 +26,7 @@ var APP0 = Parser.start()
     }
   });
 
+// eslint-disable-next-line
 var COM = Parser.start()
   .endianess("big")
   .uint16("length")
@@ -108,5 +110,5 @@ var JPEG = Parser.start().array("segments", {
 });
 
 require("fs").readFile("test.jpg", function(err, data) {
-  console.log(require("util").inspect(JPEG.parse(data), { depth: null }));
+  console.log(util.inspect(JPEG.parse(data), { depth: null }));
 });

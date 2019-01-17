@@ -1,5 +1,4 @@
 var assert = require("assert");
-var util = require("util");
 var Parser = require("../lib/binary_parser").Parser;
 
 describe("Composite parser", function() {
@@ -13,7 +12,7 @@ describe("Composite parser", function() {
         });
 
       var buffer = Buffer.from([12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
-      assert.deepEqual(parser.parse(buffer), {
+      assert.deepEqual(parser.parse(buffer).result, {
         length: 12,
         message: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
       });
@@ -27,7 +26,7 @@ describe("Composite parser", function() {
         });
 
       var buffer = Buffer.from([12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
-      assert.deepEqual(parser.parse(buffer), {
+      assert.deepEqual(parser.parse(buffer).result, {
         length: 12,
         message: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
       });
@@ -52,7 +51,7 @@ describe("Composite parser", function() {
         0xd3,
         0x04
       ]);
-      assert.deepEqual(parser.parse(buffer), {
+      assert.deepEqual(parser.parse(buffer).result, {
         length: 0x02,
         message: [{ key: 0xca, value: 1234 }, { key: 0xbe, value: 1235 }]
       });
@@ -77,7 +76,7 @@ describe("Composite parser", function() {
         0xd3,
         0x04
       ]);
-      assert.deepEqual(parser.parse(buffer), {
+      assert.deepEqual(parser.parse(buffer).result, {
         length: 0x06,
         message: [{ key: 0xca, value: 1234 }, { key: 0xbe, value: 1235 }]
       });
@@ -91,7 +90,7 @@ describe("Composite parser", function() {
       });
 
       var buffer = Buffer.from([0xca, 0xd2, 0x04, 0xbe, 0xd3, 0x04]);
-      assert.deepEqual(parser.parse(buffer), {
+      assert.deepEqual(parser.parse(buffer).result, {
         message: [{ key: 0xca, value: 1234 }, { key: 0xbe, value: 1235 }]
       });
     });
@@ -117,7 +116,7 @@ describe("Composite parser", function() {
         0xd3,
         0x04
       ]);
-      assert.deepEqual(parser.parse(buffer), {
+      assert.deepEqual(parser.parse(buffer).result, {
         length: 0x06,
         message: [{ key: 0xca, value: 1234 }, { key: 0xbe, value: 1235 }]
       });
@@ -138,9 +137,10 @@ describe("Composite parser", function() {
         });
 
       var buffer = Buffer.alloc(1 + 10 * (1 + 5 * 4));
-      var i, j;
+      var i;
+      var j;
 
-      iterator = 0;
+      var iterator = 0;
       buffer.writeUInt8(10, iterator);
       iterator += 1;
       for (i = 0; i < 10; i++) {
@@ -152,7 +152,7 @@ describe("Composite parser", function() {
         }
       }
 
-      assert.deepEqual(parser.parse(buffer), {
+      assert.deepEqual(parser.parse(buffer).result, {
         length: 10,
         rows: [
           { length: 5, cols: [0, 0, 0, 0, 0] },
@@ -186,13 +186,13 @@ describe("Composite parser", function() {
         0xff,
         0xff
       ]);
-      assert.deepEqual(parser.parse(buffer), {
+      assert.deepEqual(parser.parse(buffer).result, {
         data: [0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff]
       });
     });
     it("should parse until function returns true when readUntil is function", function() {
       var parser = Parser.start().array("data", {
-        readUntil: function(item, buf) {
+        readUntil: function(item) {
           return item === 0;
         },
         type: "uint8"
@@ -210,17 +210,19 @@ describe("Composite parser", function() {
         0xff,
         0xff
       ]);
-      assert.deepEqual(parser.parse(buffer), {
+      assert.deepEqual(parser.parse(buffer).result, {
         data: [0xff, 0xff, 0xff, 0x01, 0x00]
       });
     });
     it("should parse until function returns true when readUntil is function (using read-ahead)", function() {
-      var parser = Parser.start().array("data", {
-        readUntil: function(item, buf) {
-          return buf.length > 0 && buf.readUInt8(0) === 0;
-        },
-        type: "uint8"
-      });
+      var parser = Parser.start()
+        .endianess("big")
+        .array("data", {
+          readUntil: function(item, buf) {
+            return buf.length > 0 && buf.readUInt8(0) === 0;
+          },
+          type: "uint8"
+        });
 
       var buffer = Buffer.from([
         0xff,
@@ -234,7 +236,7 @@ describe("Composite parser", function() {
         0xff,
         0xff
       ]);
-      assert.deepEqual(parser.parse(buffer), {
+      assert.deepEqual(parser.parse(buffer).result, {
         data: [0xff, 0xff, 0xff, 0x01]
       });
     });
@@ -285,7 +287,7 @@ describe("Composite parser", function() {
         0x62,
         0x62
       ]);
-      assert.deepEqual(parser.parse(buffer), {
+      assert.deepEqual(parser.parse(buffer).result, {
         numlumps: 2,
         lumps: {
           AAAAAAAA: {
@@ -311,7 +313,7 @@ describe("Composite parser", function() {
       });
 
       var buffer = Buffer.from([0x0a, 0x0a, 0x01, 0x6e]);
-      assert.deepEqual(parser.parse(buffer), {
+      assert.deepEqual(parser.parse(buffer).result, {
         data: "10.10.1.110"
       });
     });
@@ -325,7 +327,7 @@ describe("Composite parser", function() {
         });
 
       var buffer = Buffer.from([1, 1, 1, 0]);
-      assert.deepEqual(parser.parse(buffer), {
+      assert.deepEqual(parser.parse(buffer).result, {
         length: 1,
         data: [
           {
@@ -372,7 +374,7 @@ describe("Composite parser", function() {
         /* 1 */ 1,
         /* 0 */ 0
       ]);
-      assert.deepEqual(parser.parse(buffer), {
+      assert.deepEqual(parser.parse(buffer).result, {
         length: 2,
         data: [
           {
@@ -404,7 +406,9 @@ describe("Composite parser", function() {
         },
         choices: {
           1: Parser.start().uint8("v1"),
-          2: Parser.start().uint16("v2")
+          2: Parser.start()
+            .endianess("big")
+            .uint16("v2")
         }
       });
 
@@ -413,13 +417,13 @@ describe("Composite parser", function() {
         .nest("child", { type: ChildParser });
 
       var buffer = Buffer.from([0x1, 0x2]);
-      assert.deepEqual(ParentParser.parse(buffer), {
+      assert.deepEqual(ParentParser.parse(buffer).result, {
         version: 1,
         child: { data: { v1: 2 } }
       });
 
       buffer = Buffer.from([0x2, 0x3, 0x4]);
-      assert.deepEqual(ParentParser.parse(buffer), {
+      assert.deepEqual(ParentParser.parse(buffer).result, {
         version: 2,
         child: { data: { v2: 0x0304 } }
       });
@@ -447,7 +451,7 @@ describe("Composite parser", function() {
         });
 
       var buffer = Buffer.from([0x0, 0x4e, 0x61, 0xbc, 0x00, 0x01, 0xd2, 0x04]);
-      assert.deepEqual(parser.parse(buffer), {
+      assert.deepEqual(parser.parse(buffer).result, {
         tag1: 0,
         data1: 12345678,
         tag2: 1,
@@ -467,8 +471,8 @@ describe("Composite parser", function() {
         })
         .int32le("test");
 
-      buffer = Buffer.from([0x03, 0xff, 0x2f, 0xcb, 0x04, 0x0]);
-      assert.deepEqual(parser.parse(buffer), {
+      var buffer = Buffer.from([0x03, 0xff, 0x2f, 0xcb, 0x04, 0x0]);
+      assert.deepEqual(parser.parse(buffer).result, {
         tag: 3,
         data: 0xff,
         test: 314159
@@ -503,7 +507,7 @@ describe("Composite parser", function() {
         0x6c,
         0x64
       ]);
-      assert.deepEqual(parser.parse(buffer), {
+      assert.deepEqual(parser.parse(buffer).result, {
         tag: 1,
         data: {
           length: 12,
@@ -511,7 +515,7 @@ describe("Composite parser", function() {
         }
       });
       buffer = Buffer.from([0x03, 0x4e, 0x61, 0xbc, 0x00]);
-      assert.deepEqual(parser.parse(buffer), {
+      assert.deepEqual(parser.parse(buffer).result, {
         tag: 3,
         data: {
           number: 12345678
@@ -533,7 +537,7 @@ describe("Composite parser", function() {
         });
 
       var buffer = Buffer.from([1, 1, 1, 0]);
-      assert.deepEqual(parser.parse(buffer), {
+      assert.deepEqual(parser.parse(buffer).result, {
         type: 1,
         data: {
           type: 1,
@@ -562,7 +566,7 @@ describe("Composite parser", function() {
         });
 
       var buffer = Buffer.from([2, /* left */ 1, 1, 0, /* right */ 0]);
-      assert.deepEqual(parser.parse(buffer), {
+      assert.deepEqual(parser.parse(buffer).result, {
         type: 2,
         data: {
           left: {
@@ -576,8 +580,10 @@ describe("Composite parser", function() {
     it("should be able to refer to other parsers by name", function() {
       var parser = Parser.start().namely("self");
 
+      // eslint-disable-next-line
       var stop = Parser.start().namely("stop");
 
+      // eslint-disable-next-line
       var twoCells = Parser.start()
         .namely("twoCells")
         .nest("left", { type: "self" })
@@ -593,7 +599,7 @@ describe("Composite parser", function() {
       });
 
       var buffer = Buffer.from([2, /* left */ 1, 1, 0, /* right */ 0]);
-      assert.deepEqual(parser.parse(buffer), {
+      assert.deepEqual(parser.parse(buffer).result, {
         type: 2,
         data: {
           left: {
@@ -623,7 +629,7 @@ describe("Composite parser", function() {
       });
 
       var buffer = Buffer.from([2, /* left */ 1, 1, 0, /* right */ 0]);
-      assert.deepEqual(parser.parse(buffer), {
+      assert.deepEqual(parser.parse(buffer).result, {
         type: 2,
         data: {
           left: {
@@ -678,7 +684,7 @@ describe("Composite parser", function() {
         /* right -> */ 1,
         /* -> */ 0
       ]);
-      assert.deepEqual(parser.parse(buffer), {
+      assert.deepEqual(parser.parse(buffer).result, {
         type: 2,
         data: {
           left: {
@@ -731,13 +737,13 @@ describe("Composite parser", function() {
         0x6c,
         0x64
       ]);
-      assert.deepEqual(parser.parse(buffer), {
+      assert.deepEqual(parser.parse(buffer).result, {
         tag: 1,
         length: 12,
         message: "hello, world"
       });
       buffer = Buffer.from([0x03, 0x4e, 0x61, 0xbc, 0x00]);
-      assert.deepEqual(parser.parse(buffer), {
+      assert.deepEqual(parser.parse(buffer).result, {
         tag: 3,
         number: 12345678
       });
@@ -771,13 +777,13 @@ describe("Composite parser", function() {
         0x6c,
         0x64
       ]);
-      assert.deepEqual(parser.parse(buffer), {
+      assert.deepEqual(parser.parse(buffer).result, {
         tag: 1,
         length: 12,
         message: "hello, world"
       });
       buffer = Buffer.from([0x03, 0x4e, 0x61, 0xbc, 0x00]);
-      assert.deepEqual(parser.parse(buffer), {
+      assert.deepEqual(parser.parse(buffer).result, {
         tag: 3,
         number: 12345678
       });
@@ -816,13 +822,13 @@ describe("Composite parser", function() {
         0x6c,
         0x64
       ]);
-      assert.deepEqual(parser.parse(buffer), {
+      assert.deepEqual(parser.parse(buffer).result, {
         selector: "0010", // -> choice 2
         length: 12,
         message: "hello, world"
       });
       buffer = Buffer.from([48, 49, 49, 49, 0x4e, 0x61, 0xbc, 0x00]);
-      assert.deepEqual(parser.parse(buffer), {
+      assert.deepEqual(parser.parse(buffer).result, {
         selector: "0111", // -> choice 7
         number: 12345678
       });
@@ -851,7 +857,7 @@ describe("Composite parser", function() {
         Buffer.from("John\0Doe\0"),
         Buffer.from([0x20])
       ]);
-      assert.deepEqual(personParser.parse(buffer), {
+      assert.deepEqual(personParser.parse(buffer).result, {
         name: {
           firstName: "John",
           lastName: "Doe"
@@ -873,12 +879,12 @@ describe("Composite parser", function() {
       var personParser = new Parser().nest("name", {
         type: nameParser,
         formatter: function(name) {
-          return name.firstName + " " + name.lastName;
+          return `${name.firstName} ${name.lastName}`;
         }
       });
 
       var buffer = Buffer.from("John\0Doe\0");
-      assert.deepEqual(personParser.parse(buffer), {
+      assert.deepEqual(personParser.parse(buffer).result, {
         name: "John Doe"
       });
     });
@@ -892,7 +898,7 @@ describe("Composite parser", function() {
 
       var buf = Buffer.from("foo\0bar\0");
 
-      assert.deepEqual(parser.parse(buf), { s1: "foo", s2: "bar" });
+      assert.deepEqual(parser.parse(buf).result, { s1: "foo", s2: "bar" });
     });
 
     it("should 'flatten' output when omitting varName", function() {
@@ -902,13 +908,13 @@ describe("Composite parser", function() {
 
       var buf = Buffer.from("foo\0bar\0");
 
-      assert.deepEqual(parser.parse(buf), { s1: "foo", s2: "bar" });
+      assert.deepEqual(parser.parse(buf).result, { s1: "foo", s2: "bar" });
     });
   });
 
   describe("Buffer parser", function() {
-    //this is a test for testing a fix of a bug, that removed the last byte of the
-    //buffer parser
+    // this is a test for testing a fix of a bug, that removed the last byte of the
+    // buffer parser
     it("should return a buffer with same size", function() {
       var bufferParser = new Parser().buffer("buf", {
         readUntil: "eof",
@@ -918,7 +924,7 @@ describe("Composite parser", function() {
       });
 
       var buffer = Buffer.from("John\0Doe\0");
-      assert.deepEqual(bufferParser.parse(buffer), { buf: buffer });
+      assert.deepEqual(bufferParser.parse(buffer).result, { buf: buffer });
     });
   });
 
@@ -937,7 +943,7 @@ describe("Composite parser", function() {
         });
 
       var buffer = Buffer.from("John Doe\0");
-      var person = parser.parse(buffer);
+      var person = parser.parse(buffer).result;
       assert.ok(person instanceof Person);
       assert.equal(person.name, "John Doe");
     });
@@ -999,10 +1005,11 @@ describe("Composite parser", function() {
       var buffer = Buffer.from([0, 1, 0, 4]);
       for (var i = 17; i <= 24; i++) {
         var parser = Parser.start()
-          ["bit" + i]("a")
+          .endianess("big")
+          [`bit${i}`]("a")
           .uint8("b");
 
-        assert.deepEqual(parser.parse(buffer), {
+        assert.deepEqual(parser.parse(buffer).result, {
           a: 1 << (i - 16),
           b: 4
         });
