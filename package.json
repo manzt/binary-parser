@@ -22,7 +22,6 @@
     "istanbul": "^0.4.5",
     "jest": "^23.6.0",
     "mocha": "^5.2.0",
-    "opn-cli": "^3.1.0",
     "prettier": "^1.9.2",
     "puppeteer": "^1.11.0",
     "webpack": "^4.28.4",
