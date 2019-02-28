@@ -1,8 +1,8 @@
-[![Build Status](https://travis-ci.com/GMOD/binary-parser.svg?branch=master)](https://travis-ci.com/GMOD/binary-parser)
 
 # binary-parser
 
 [![Greenkeeper badge](https://badges.greenkeeper.io/GMOD/binary-parser.svg)](https://greenkeeper.io/)
+[![Build Status](https://travis-ci.com/GMOD/binary-parser.svg?branch=master)](https://travis-ci.com/GMOD/binary-parser)
 
 @gmod/binary-parser is a fork of https://github.com/keichi/binary-parser that also handles 64-bit longs and itf8 and ltf8 types
 
