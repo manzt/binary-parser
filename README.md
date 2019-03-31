@@ -15,3 +15,8 @@ $ npm install @gmod/binary-parser
 ```
 
 Important! Default this library is default little endian instead instead of big endian while https://github.com/keichi/binary-parser is default big endian
+
+Example of reading a 64-bit int
+
+    .buffer('mylong64bitint', { length: 8, formatter: function(buf) { return Long.fromBytes(buf, true, this.endian==='le').toNumber() } })
+
