@@ -14,7 +14,6 @@
     "eslint-config-prettier": "^4.1.0",
     "eslint-plugin-import": "^2.10.0",
     "eslint-plugin-prettier": "^2.6.0",
-    "istanbul": "^0.4.5",
     "jest": "^24.7.1",
     "mocha": "^6.0.0",
     "prettier": "^1.9.2",
@@ -26,7 +25,6 @@
     "test": "jest",
     "lint": "eslint lib example test/*.js",
     "build": "babel lib -d dist",
-    "cover": "istanbul cover --report html node_modules/.bin/_mocha",
     "test-webpack": "webpack --config test/browser/webpack.config.js && node test/browser/run-puppeteer.js"
   },
   "keywords": [
