@@ -20,5 +20,9 @@ Important! Default this library is default little endian instead instead of big 
 
 Example of reading a 64-bit int
 
-    .buffer('mylong64bitint', { length: 8, formatter: function(buf) { return Long.fromBytes(buf, true, this.endian==='le').toNumber() } })
+    .uint64('mylong64bitint')
+    .int64('mylong64bitint')
 
+64 bit infers from the endianess of the .endianess, doesn't use uint64le/be
+
+Verification of whether it is valid 2^53 max int is not done for 64 bit either

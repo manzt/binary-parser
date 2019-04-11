@@ -22,6 +22,24 @@ describe("Primitive parser", function() {
         c: 12345678
       });
     });
+    it("should parse 64bit types", function() {
+      var parser = Parser.start().uint64("a");
+      //  .int64("b")
+
+      var buffer = Buffer.from([
+        0xff,
+        0xff,
+        0xff,
+        0xff,
+        0xff,
+        0xff,
+        0x00,
+        0x00
+      ]);
+      assert.deepEqual(parser.parse(buffer).result, {
+        a: 281474976710655
+      });
+    });
     it("should use formatter to transform parsed integer", function() {
       var parser = Parser.start()
         .uint8("a", {
