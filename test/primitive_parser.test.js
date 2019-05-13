@@ -16,11 +16,14 @@ describe("Primitive parser", function() {
         .uint32be("c");
 
       var buffer = Buffer.from([0x00, 0xd2, 0x04, 0x00, 0xbc, 0x61, 0x4e]);
-      assert.deepEqual(parser.parse(buffer), { result: {
-        a: 0,
-        b: 1234,
-        c: 12345678
-      }, offset: 7});
+      assert.deepEqual(parser.parse(buffer), {
+        result: {
+          a: 0,
+          b: 1234,
+          c: 12345678
+        },
+        offset: 7
+      });
     });
     it("should parse 64bit types", function() {
       var parser = Parser.start().uint64("a");
