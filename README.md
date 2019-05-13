@@ -41,7 +41,7 @@ The 64-bit parsing in this library is done by https://www.npmjs.com/package/long
 
 * This library is default little endian instead instead of big endian while https://github.com/keichi/binary-parser is default big endian
 
-* The return value of the parse {result: <parsed results>,offset: <number of bytes parsed>}
+* The return value of the parse `{result: {<parsed results>},offset: <number of bytes parsed>}` instead of just `{<parsed results>}`
 
 
 ## Example usage
