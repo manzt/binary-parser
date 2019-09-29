@@ -11,7 +11,7 @@ var APP0 = Parser.start()
   .string('id', {
     encoding: 'ascii',
     zeroTerminated: true,
-    validate: 'JFIF',
+    assert: 'JFIF',
   })
   .uint16('version')
   .uint8('unit')
@@ -84,7 +84,7 @@ var SOF0 = Parser.start()
 var Ignore = Parser.start()
   .endianess('big')
   .uint16('length')
-  .skip(function() {
+  .seek(function() {
     return this.length - 2;
   });
 
