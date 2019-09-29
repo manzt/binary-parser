@@ -14,11 +14,11 @@ var ipHeader = new Parser()
   .uint16('checksum')
   .array('src', {
     type: 'uint8',
-    length: 4
+    length: 4,
   })
   .array('dst', {
     type: 'uint8',
-    length: 4
+    length: 4,
   });
 
 var buf = Buffer.from('450002c5939900002c06ef98adc24f6c850186d1', 'hex');

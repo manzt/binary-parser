@@ -12,7 +12,7 @@ var bmpFileHeader = new Parser()
   .endianess('little')
   .string('type', {
     length: 2,
-    assert: 'BM'
+    assert: 'BM',
   })
   .uint32('size')
   .uint16('reserved1')
@@ -49,10 +49,10 @@ var bmpInfoHeader = new Parser()
 
 var bmpFile = new Parser()
   .nest('fileHeader', {
-    type: bmpFileHeader
+    type: bmpFileHeader,
   })
   .nest('infoHeader', {
-    type: bmpInfoHeader
+    type: bmpInfoHeader,
   });
 
 require('fs').readFile('test.bmp', function(err, data) {

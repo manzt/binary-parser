@@ -11,7 +11,7 @@ var APP0 = Parser.start()
   .string('id', {
     encoding: 'ascii',
     zeroTerminated: true,
-    validate: 'JFIF'
+    validate: 'JFIF',
   })
   .uint16('version')
   .uint8('unit')
@@ -23,7 +23,7 @@ var APP0 = Parser.start()
     type: 'uint8',
     length: function() {
       return this.Xt * this.Yt * 3;
-    }
+    },
   });
 
 // eslint-disable-next-line
@@ -34,7 +34,7 @@ var COM = Parser.start()
     encoding: 'ascii',
     length: function() {
       return this.length - 2;
-    }
+    },
   });
 
 var SOS = Parser.start()
@@ -45,7 +45,7 @@ var SOS = Parser.start()
     type: Parser.start()
       .uint8('id')
       .uint8('dht'),
-    length: 'componentCount'
+    length: 'componentCount',
   })
   .uint8('spectrumStart')
   .uint8('spectrumEnd')
@@ -59,11 +59,11 @@ var DQT = Parser.start()
       .uint8('precisionAndTableId')
       .array('table', {
         type: 'uint8',
-        length: 64
+        length: 64,
       }),
     length: function() {
       return (this.length - 2) / 65;
-    }
+    },
   });
 
 var SOF0 = Parser.start()
@@ -78,7 +78,7 @@ var SOF0 = Parser.start()
       .uint8('id')
       .uint8('samplingFactor')
       .uint8('quantizationTableId'),
-    length: 'componentCount'
+    length: 'componentCount',
   });
 
 var Ignore = Parser.start()
@@ -99,14 +99,14 @@ var Segment = Parser.start()
       0xffe0: APP0,
       0xffda: SOS,
       0xffdb: DQT,
-      0xffc0: SOF0
+      0xffc0: SOF0,
     },
-    defaultChoice: Ignore
+    defaultChoice: Ignore,
   });
 
 var JPEG = Parser.start().array('segments', {
   type: Segment,
-  readUntil: 'eof'
+  readUntil: 'eof',
 });
 
 require('fs').readFile('test.jpg', function(err, data) {

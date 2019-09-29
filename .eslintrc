@@ -39,7 +39,8 @@
       "error",
       {
         "singleQuote": true,
-        "semi": true
+        "semi": true,
+	"trailingComma": "all"
       }
     ]
   }

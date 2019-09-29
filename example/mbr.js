@@ -6,7 +6,7 @@ var chs = new Parser({
     val.cylinder |= val.cylinderHigh << 8;
     delete val.cylinderHigh;
     return val;
-  }
+  },
 })
   .uint8('head')
   .bit2('cylinderHigh')
@@ -16,11 +16,11 @@ var chs = new Parser({
 var partitionTable = new Parser()
   .uint8('bootFlag')
   .nest('startCHS', {
-    type: chs
+    type: chs,
   })
   .uint8('type')
   .nest('endCHS', {
-    type: chs
+    type: chs,
   })
   .uint32le('startLBA')
   .uint32le('endLBA');
@@ -29,10 +29,10 @@ var mbrParser = new Parser()
   .skip(446)
   .array('partitionTables', {
     type: partitionTable,
-    length: 4
+    length: 4,
   })
   .int16be('signature', {
-    assert: 0x55aa
+    assert: 0x55aa,
   });
 
 fs.readFile('raspbian.img', function(err, data) {

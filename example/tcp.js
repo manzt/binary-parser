@@ -15,7 +15,7 @@ var tcpHeader = new Parser()
       .bit1('psh')
       .bit1('rst')
       .bit1('syn')
-      .bit1('fin')
+      .bit1('fin'),
   })
   .uint16('windowSize')
   .uint16('checksum')
@@ -23,7 +23,7 @@ var tcpHeader = new Parser()
 
 var buf = Buffer.from(
   'e8a203e108e177e13d20756b801829d3004100000101080a2ea486ba793310bc',
-  'hex'
+  'hex',
 );
 
 console.log(tcpHeader.parse(buf));

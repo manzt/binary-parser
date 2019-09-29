@@ -26,7 +26,7 @@ var tarHeader = new Parser()
 
 var tarItem = new Parser()
   .nest({
-    type: tarHeader
+    type: tarHeader,
   })
   .skip(function() {
     return Math.ceil(this.size / 512) * 512;
@@ -34,7 +34,7 @@ var tarItem = new Parser()
 
 var tarArchive = new Parser().array('files', {
   type: tarItem,
-  readUntil: 'eof'
+  readUntil: 'eof',
 });
 
 fs.readFile('test.tar', function(err, data) {

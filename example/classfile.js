@@ -65,8 +65,8 @@ var CpInfo = Parser.start()
       12: ConstantNameAndTypeInfo,
       1: ConstantUtf8Info,
       16: ConstantMethodTypeInfo,
-      18: ConstantInvokeDynamicInfo
-    }
+      18: ConstantInvokeDynamicInfo,
+    },
   });
 
 var ClassFile = Parser.start()
@@ -79,7 +79,7 @@ var ClassFile = Parser.start()
     type: CpInfo,
     length: function() {
       return this.constant_pool_count - 1;
-    }
+    },
   });
 
 require('fs').readFile('Hello.class', function(err, data) {

@@ -20,9 +20,9 @@ describe('Primitive parser', function() {
         result: {
           a: 0,
           b: 1234,
-          c: 12345678
+          c: 12345678,
         },
-        offset: 7
+        offset: 7,
       });
     });
     it('should parse 64bit types', function() {
@@ -37,10 +37,10 @@ describe('Primitive parser', function() {
         0xff,
         0xff,
         0x00,
-        0x00
+        0x00,
       ]);
       assert.deepEqual(parser.parse(buffer).result, {
-        a: 281474976710655
+        a: 281474976710655,
       });
     });
     it('should use formatter to transform parsed integer', function() {
@@ -48,12 +48,12 @@ describe('Primitive parser', function() {
         .uint8('a', {
           formatter: function(val) {
             return val * 2;
-          }
+          },
         })
         .int16le('b', {
           formatter: function(val) {
             return `test${String(val)}`;
-          }
+          },
         });
 
       var buffer = Buffer.from([0x01, 0xd2, 0x04]);
@@ -77,7 +77,7 @@ describe('Primitive parser', function() {
         0x57,
         0x5b,
         0xb1,
-        0xbf
+        0xbf,
       ]);
       var result = parser.parse(buffer).result;
 
@@ -97,11 +97,11 @@ describe('Primitive parser', function() {
         0x00,
         0xbc,
         0x61,
-        0x4e
+        0x4e,
       ]);
       assert.deepEqual(parser.parse(buffer).result, {
         little: 12345678,
-        big: 12345678
+        big: 12345678,
       });
     });
     it('should skip when specified', function() {
@@ -121,12 +121,12 @@ describe('Primitive parser', function() {
         0x00,
         0xbc,
         0x61,
-        0x4e
+        0x4e,
       ]);
       assert.deepEqual(parser.parse(buffer).result, {
         a: 0,
         b: 1234,
-        c: 12345678
+        c: 12345678,
       });
     });
   });
@@ -148,7 +148,7 @@ describe('Primitive parser', function() {
       assert.deepEqual(binaryLiteral('11110000'), Buffer.from([0xf0]));
       assert.deepEqual(
         binaryLiteral('11110000 10100101'),
-        Buffer.from([0xf0, 0xa5])
+        Buffer.from([0xf0, 0xa5]),
       );
     });
 
@@ -165,7 +165,7 @@ describe('Primitive parser', function() {
         a: 1,
         b: 2,
         c: 10,
-        d: 0
+        d: 0,
       });
 
       parser = new Parser()
@@ -179,7 +179,7 @@ describe('Primitive parser', function() {
         a: 0,
         b: 2,
         c: 10,
-        d: 1
+        d: 1,
       });
     });
     it('should parse 2-byte-length bit field sequence', function() {
@@ -193,7 +193,7 @@ describe('Primitive parser', function() {
       assert.deepEqual(parser.parse(buf).result, {
         a: 5,
         b: 455,
-        c: 7
+        c: 7,
       });
 
       parser = new Parser()
@@ -204,7 +204,7 @@ describe('Primitive parser', function() {
       assert.deepEqual(parser.parse(buf).result, {
         a: 7,
         b: 398,
-        c: 11
+        c: 11,
       });
     });
     it('should parse 4-byte-length bit field sequence', function() {
@@ -221,7 +221,7 @@ describe('Primitive parser', function() {
         b: 11184810,
         c: 15,
         d: 1,
-        e: 1
+        e: 1,
       });
 
       parser = new Parser()
@@ -236,7 +236,7 @@ describe('Primitive parser', function() {
         b: 11184829,
         c: 10,
         d: 2,
-        e: 1
+        e: 1,
       });
     });
     it('should parse nested bit fields', function() {
@@ -245,7 +245,7 @@ describe('Primitive parser', function() {
           .endianess('big')
           .bit2('b')
           .bit4('c')
-          .bit1('d')
+          .bit1('d'),
       });
 
       var buf = binaryLiteral('11010100');
@@ -255,8 +255,8 @@ describe('Primitive parser', function() {
         x: {
           b: 2,
           c: 10,
-          d: 0
-        }
+          d: 0,
+        },
       });
     });
   });
@@ -267,7 +267,7 @@ describe('Primitive parser', function() {
       var buffer = Buffer.from(text, 'ascii');
       var parser = Parser.start().string('msg', {
         length: buffer.length,
-        encoding: 'ascii'
+        encoding: 'ascii',
       });
 
       assert.equal(parser.parse(buffer).result.msg, text);
@@ -277,7 +277,7 @@ describe('Primitive parser', function() {
       var buffer = Buffer.from(text, 'utf8');
       var parser = Parser.start().string('msg', {
         length: buffer.length,
-        encoding: 'utf8'
+        encoding: 'utf8',
       });
 
       assert.equal(parser.parse(buffer).result.msg, text);
@@ -287,7 +287,7 @@ describe('Primitive parser', function() {
       var buffer = Buffer.from(text, 'hex');
       var parser = Parser.start().string('msg', {
         length: buffer.length,
-        encoding: 'hex'
+        encoding: 'hex',
       });
 
       assert.equal(parser.parse(buffer).result.msg, text);
@@ -304,7 +304,7 @@ describe('Primitive parser', function() {
       var buffer = Buffer.from('68656c6c6f2c20776f726c6400', 'hex');
       var parser = Parser.start().string('msg', {
         zeroTerminated: true,
-        encoding: 'ascii'
+        encoding: 'ascii',
       });
 
       assert.deepEqual(parser.parse(buffer).result, { msg: 'hello, world' });
@@ -319,18 +319,18 @@ describe('Primitive parser', function() {
       assert.deepEqual(parser.parse(buffer).result, {
         a: 'abc',
         b: 'defgh',
-        c: 'ij'
+        c: 'ij',
       });
     });
     it('should strip trailing null characters', function() {
       var buffer = Buffer.from('746573740000', 'hex');
       var parser1 = Parser.start().string('str', {
         length: 7,
-        stripNull: false
+        stripNull: false,
       });
       var parser2 = Parser.start().string('str', {
         length: 7,
-        stripNull: true
+        stripNull: true,
       });
 
       assert.equal(parser1.parse(buffer).result.str, 'test\u0000\u0000');
@@ -341,7 +341,7 @@ describe('Primitive parser', function() {
       var parser = Parser.start().string('a', { greedy: true });
 
       assert.deepEqual(parser.parse(buffer).result, {
-        a: 'abc\u0000defghij\u0000'
+        a: 'abc\u0000defghij\u0000',
       });
     });
   });
@@ -349,7 +349,7 @@ describe('Primitive parser', function() {
   describe('Buffer parser', function() {
     it('should parse as buffer', function() {
       var parser = new Parser().uint8('len').buffer('raw', {
-        length: 'len'
+        length: 'len',
       });
 
       var buf = Buffer.from('deadbeefdeadbeef', 'hex');
@@ -361,7 +361,7 @@ describe('Primitive parser', function() {
     it('should clone buffer if options.clone is true', function() {
       var parser = new Parser().buffer('raw', {
         length: 8,
-        clone: true
+        clone: true,
       });
 
       var buf = Buffer.from('deadbeefdeadbeef', 'hex');
