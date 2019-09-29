@@ -1,15 +1,12 @@
 import { Buffer } from 'buffer';
 import { runInNewContext } from 'vm';
 import { Context } from './context';
-import Long from 'long'
-
+import Long from 'long';
 
 //@ts-ignore
-if (typeof window !== "undefined") window.Buffer = Buffer;
+if (typeof window !== 'undefined') window.Buffer = Buffer;
 //@ts-ignore
-if (typeof self !== "undefined") self.Buffer = Buffer; // this is for webworker, and also is not an elseif to avoid window polyfills in webworker
-
-
+if (typeof self !== 'undefined') self.Buffer = Buffer; // this is for webworker, and also is not an elseif to avoid window polyfills in webworker
 
 const aliasRegistry: { [key: string]: Parser } = {};
 const FUNCTION_PREFIX = '___parser_';
@@ -190,7 +187,7 @@ export class Parser {
     const typeName = CAPITILIZED_TYPE_NAMES[type];
 
     ctx.pushCode(
-      `${ctx.generateVariable(this.varName)} = buffer.read${typeName}(offset);`
+      `${ctx.generateVariable(this.varName)} = buffer.read${typeName}(offset);`,
     );
     ctx.pushCode(`offset += ${PRIMITIVE_SIZES[type]};`);
   }
@@ -198,7 +195,7 @@ export class Parser {
   private primitiveN(
     type: PrimitiveTypes,
     varName: string,
-    options?: ParserOptions
+    options?: ParserOptions,
   ) {
     return this.setNextParser(type as Types, varName, options);
   }
@@ -262,7 +259,6 @@ export class Parser {
     return this.setNextParser('int64be', varName, options);
   }
   int64le(varName: string, options?: ParserOptions) {
-
     return this.setNextParser('int64le', varName, options);
   }
 
@@ -415,17 +411,17 @@ export class Parser {
   string(varName: string, options: ParserOptions) {
     if (!options.zeroTerminated && !options.length && !options.greedy) {
       throw new Error(
-        'Neither length, zeroTerminated, nor greedy is defined for string.'
+        'Neither length, zeroTerminated, nor greedy is defined for string.',
       );
     }
     if ((options.zeroTerminated || options.length) && options.greedy) {
       throw new Error(
-        'greedy is mutually exclusive with length and zeroTerminated for string.'
+        'greedy is mutually exclusive with length and zeroTerminated for string.',
       );
     }
     if (options.stripNull && !(options.length || options.greedy)) {
       throw new Error(
-        'Length or greedy must be defined if stripNull is defined.'
+        'Length or greedy must be defined if stripNull is defined.',
       );
     }
     options.encoding = options.encoding || 'utf8';
@@ -454,7 +450,7 @@ export class Parser {
       Object.keys(PRIMITIVE_SIZES).indexOf(options.type) < 0
     ) {
       throw new Error(
-        `Specified primitive type "${options.type}" is not supported.`
+        `Specified primitive type "${options.type}" is not supported.`,
       );
     }
 
@@ -492,7 +488,7 @@ export class Parser {
         Object.keys(PRIMITIVE_SIZES).indexOf(value) < 0
       ) {
         throw new Error(
-          `Specified primitive type "${value}" is not supported.`
+          `Specified primitive type "${value}" is not supported.`,
         );
       }
     });
@@ -514,7 +510,7 @@ export class Parser {
     }
     if (!(options.type instanceof Parser) && !varName) {
       throw new Error(
-        'options.type must be a object if variable name is omitted.'
+        'options.type must be a object if variable name is omitted.',
       );
     }
 
@@ -534,13 +530,13 @@ export class Parser {
         !aliasRegistry[options.type]
       ) {
         throw new Error(
-          'Specified type "' + options.type + '" is not supported.'
+          'Specified type "' + options.type + '" is not supported.',
         );
       }
     } else if (options.type instanceof Parser) {
     } else {
       throw new Error(
-        'Type option of pointer must be a string or a Parser object.'
+        'Type option of pointer must be a string or a Parser object.',
       );
     }
 
@@ -644,7 +640,8 @@ export class Parser {
   }
 
   compile() {
-    const src = '(function(buffer, constructorFn, Long) { ' + this.getCode() + ' })';
+    const src =
+      '(function(buffer, constructorFn, Long) { ' + this.getCode() + ' })';
     this.compiled = runInNewContext(src, { Buffer });
   }
 
@@ -817,11 +814,11 @@ export class Parser {
         break;
       default:
         throw new Error(
-          'Assert option supports only strings, numbers and assert functions.'
+          'Assert option supports only strings, numbers and assert functions.',
         );
     }
     ctx.generateError(
-      `"Assert error: ${varName} is " + ${this.options.assert}`
+      `"Assert error: ${varName} is " + ${this.options.assert}`,
     );
     ctx.pushCode('}');
   }
@@ -835,15 +832,18 @@ export class Parser {
     return ctx;
   }
 
-  private generateInt64(ctx: Context, unsigned:boolean, endianness:boolean) {
+  private generateInt64(ctx: Context, unsigned: boolean, endianness: boolean) {
     // TODO find better method to handle nested bit fields
     const parser = JSON.parse(JSON.stringify(this));
     parser.varName = ctx.generateVariable(parser.varName);
 
-    ctx.pushCode(`${parser.varName} = Long.fromBytes(buffer.slice(offset, offset+8), ${unsigned}, ${endianness}).toNumber()`)
-    ctx.pushCode(`offset += 8`)
+    ctx.pushCode(
+      `${
+        parser.varName
+      } = Long.fromBytes(buffer.slice(offset, offset+8), ${unsigned}, ${endianness}).toNumber()`,
+    );
+    ctx.pushCode(`offset += 8`);
   }
-
 
   private generateBit(ctx: Context) {
     // TODO find better method to handle nested bit fields
@@ -878,7 +878,7 @@ export class Parser {
         sum = 32;
       } else {
         throw new Error(
-          'Currently, bit field sequence longer than 4-bytes is not supported.'
+          'Currently, bit field sequence longer than 4-bytes is not supported.',
         );
       }
       ctx.pushCode(`offset += ${sum / 8};`);
@@ -913,28 +913,28 @@ export class Parser {
       const len = this.options.length;
       ctx.pushCode(`var ${start} = offset;`);
       ctx.pushCode(
-        `while(buffer.readUInt8(offset++) !== 0 && offset - ${start}  < ${len});`
+        `while(buffer.readUInt8(offset++) !== 0 && offset - ${start}  < ${len});`,
       );
       ctx.pushCode(
-        `${name} = buffer.toString('${encoding}', ${start}, offset - ${start} < ${len} ? offset - 1 : offset);`
+        `${name} = buffer.toString('${encoding}', ${start}, offset - ${start} < ${len} ? offset - 1 : offset);`,
       );
     } else if (this.options.length) {
       const len = ctx.generateOption(this.options.length);
       ctx.pushCode(
-        `${name} = buffer.toString('${encoding}', offset, offset + ${len});`
+        `${name} = buffer.toString('${encoding}', offset, offset + ${len});`,
       );
       ctx.pushCode(`offset += ${len};`);
     } else if (this.options.zeroTerminated) {
       ctx.pushCode(`var ${start} = offset;`);
       ctx.pushCode('while(buffer.readUInt8(offset++) !== 0);');
       ctx.pushCode(
-        `${name} = buffer.toString('${encoding}', ${start}, offset - 1);`
+        `${name} = buffer.toString('${encoding}', ${start}, offset - 1);`,
       );
     } else if (this.options.greedy) {
       ctx.pushCode(`var ${start} = offset;`);
       ctx.pushCode('while(buffer.length > offset++);');
       ctx.pushCode(
-        `${name} = buffer.toString('${encoding}', ${start}, offset);`
+        `${name} = buffer.toString('${encoding}', ${start}, offset);`,
       );
     }
     if (this.options.stripNull) {
@@ -955,7 +955,7 @@ export class Parser {
       ctx.pushCode(`while (offset < buffer.length) {`);
       ctx.pushCode(`${cur} = buffer.readUInt8(offset);`);
       ctx.pushCode(
-        `if (${pred}.call(this, ${cur}, buffer.slice(offset))) break;`
+        `if (${pred}.call(this, ${cur}, buffer.slice(offset))) break;`,
       );
       ctx.pushCode(`offset += 1;`);
       ctx.pushCode(`}`);
@@ -993,15 +993,15 @@ export class Parser {
       ctx.pushCode('do {');
     } else if (this.options.readUntil === 'eof') {
       ctx.pushCode(
-        `for (var ${counter} = 0; offset < buffer.length; ${counter}++) {`
+        `for (var ${counter} = 0; offset < buffer.length; ${counter}++) {`,
       );
     } else if (lengthInBytes !== undefined) {
       ctx.pushCode(
-        `for (var ${counter} = offset; offset - ${counter} < ${lengthInBytes}; ) {`
+        `for (var ${counter} = offset; offset - ${counter} < ${lengthInBytes}; ) {`,
       );
     } else {
       ctx.pushCode(
-        `for (var ${counter} = 0; ${counter} < ${length}; ${counter}++) {`
+        `for (var ${counter} = 0; ${counter} < ${length}; ${counter}++) {`,
       );
     }
 
@@ -1014,7 +1014,7 @@ export class Parser {
         const tempVar = ctx.generateTmpVariable();
         ctx.pushCode(`var ${tempVar} = ${FUNCTION_PREFIX + type}(offset);`);
         ctx.pushCode(
-          `var ${item} = ${tempVar}.result; offset = ${tempVar}.offset;`
+          `var ${item} = ${tempVar}.result; offset = ${tempVar}.offset;`,
         );
         if (type !== this.alias) ctx.addReference(type);
       }
@@ -1037,7 +1037,7 @@ export class Parser {
     if (typeof this.options.readUntil === 'function') {
       const pred = this.options.readUntil;
       ctx.pushCode(
-        `while (!(${pred}).call(this, ${item}, buffer.slice(offset)));`
+        `while (!(${pred}).call(this, ${item}, buffer.slice(offset)));`,
       );
     }
   }
@@ -1045,7 +1045,7 @@ export class Parser {
   private generateChoiceCase(
     ctx: Context,
     varName: string,
-    type: string | Parser
+    type: string | Parser,
   ) {
     if (typeof type === 'string') {
       const varName = ctx.generateVariable(this.varName);
@@ -1057,7 +1057,7 @@ export class Parser {
         const tempVar = ctx.generateTmpVariable();
         ctx.pushCode(`var ${tempVar} = ${FUNCTION_PREFIX + type}(offset);`);
         ctx.pushCode(
-          `${varName} = ${tempVar}.result; offset = ${tempVar}.offset;`
+          `${varName} = ${tempVar}.result; offset = ${tempVar}.offset;`,
         );
         if (type !== this.alias) ctx.addReference(type);
       }
@@ -1103,10 +1103,10 @@ export class Parser {
     } else if (aliasRegistry[this.options.type]) {
       const tempVar = ctx.generateTmpVariable();
       ctx.pushCode(
-        `var ${tempVar} = ${FUNCTION_PREFIX + this.options.type}(offset);`
+        `var ${tempVar} = ${FUNCTION_PREFIX + this.options.type}(offset);`,
       );
       ctx.pushCode(
-        `${nestVar} = ${tempVar}.result; offset = ${tempVar}.offset;`
+        `${nestVar} = ${tempVar}.result; offset = ${tempVar}.offset;`,
       );
       if (this.options.type !== this.alias) ctx.addReference(this.options.type);
     }
@@ -1115,7 +1115,7 @@ export class Parser {
   private generateFormatter(
     ctx: Context,
     varName: string,
-    formatter: Function
+    formatter: Function,
   ) {
     if (typeof formatter === 'function') {
       ctx.pushCode(`${varName} = (${formatter}).call(this, ${varName});`);
@@ -1142,10 +1142,10 @@ export class Parser {
     } else if (aliasRegistry[this.options.type]) {
       const tempVar = ctx.generateTmpVariable();
       ctx.pushCode(
-        `var ${tempVar} = ${FUNCTION_PREFIX + this.options.type}(offset);`
+        `var ${tempVar} = ${FUNCTION_PREFIX + this.options.type}(offset);`,
       );
       ctx.pushCode(
-        `${nestVar} = ${tempVar}.result; offset = ${tempVar}.offset;`
+        `${nestVar} = ${tempVar}.result; offset = ${tempVar}.offset;`,
       );
       if (this.options.type !== this.alias) ctx.addReference(this.options.type);
     } else if (Object.keys(PRIMITIVE_SIZES).indexOf(this.options.type) >= 0) {
