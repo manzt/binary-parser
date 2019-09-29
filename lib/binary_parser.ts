@@ -701,6 +701,7 @@ export class Parser {
     if (!this.compiled) {
       this.compile();
     }
+    console.log(this.compiled,this.getCode())
 
     return this.compiled(buffer, this.constructorFn, Long);
   }
@@ -837,7 +838,7 @@ export class Parser {
     const parser = JSON.parse(JSON.stringify(this));
     parser.varName = ctx.generateVariable(parser.varName);
 
-    ctx.pushCode(`${parser.varName} = Long.fromBytes(buffer(offset, offset+8), ${unsigned}, ${endianness}).toNumber()`)
+    ctx.pushCode(`${parser.varName} = Long.fromBytes(buffer.slice(offset, offset+8), ${unsigned}, ${endianness}).toNumber()`)
     ctx.pushCode(`offset += 8`)
   }
 
