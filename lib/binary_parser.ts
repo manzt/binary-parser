@@ -79,7 +79,9 @@ type PrimitiveTypesWithoutEndian =
   | 'int16'
   | 'int32'
   | 'int64'
-  | 'uint64';
+  | 'uint64'
+  | 'double'
+  | 'float';
 
 type BitSizes =
   | 1
@@ -286,6 +288,14 @@ export class Parser {
   }
   floatbe(varName: string, options?: ParserOptions) {
     return this.primitiveN('floatbe', varName, options);
+  }
+
+  double(varName: string, options?: ParserOptions) {
+    return this.primitiveN(this.useThisEndian('double'), varName, options);
+  }
+
+  float(varName: string, options?: ParserOptions) {
+    return this.primitiveN(this.useThisEndian('float'), varName, options);
   }
 
   doublele(varName: string, options?: ParserOptions) {
