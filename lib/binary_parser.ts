@@ -1,6 +1,12 @@
 import { Buffer } from 'buffer';
 import { runInNewContext } from 'vm';
 import { Context } from './context';
+import Long from 'long'
+
+if (typeof window !== "undefined") window.Buffer = Buffer;
+if (typeof self !== "undefined") self.Buffer = Buffer; // this is for webworker, and also is not an elseif to avoid window polyfills in webworker
+
+
 
 const aliasRegistry: { [key: string]: Parser } = {};
 const FUNCTION_PREFIX = '___parser_';
@@ -36,6 +42,8 @@ type ComplexTypes =
   | 'seek'
   | 'pointer'
   | 'saveOffset'
+  | 'itf8'
+  | 'ltf8'
   | '';
 
 type Endianess = 'be' | 'le';
@@ -153,6 +161,8 @@ const CAPITILIZED_TYPE_NAMES: { [key in Types]: string } = {
   seek: 'Seek',
   pointer: 'Pointer',
   saveOffset: 'SaveOffset',
+  itf8: 'Itf8',
+  ltf8: 'Ltf8',
   '': '',
 };
 
@@ -163,7 +173,7 @@ export class Parser {
   next: Parser | null = null;
   head: Parser | null = null;
   compiled: Function | null = null;
-  endian: Endianess = 'be';
+  endian: Endianess = 'le';
   constructorFn: Function | null = null;
   alias: string | null = null;
 
@@ -242,40 +252,25 @@ export class Parser {
     return this.primitiveN('int32be', varName, options);
   }
 
-  private bigIntVersionCheck() {
-    const [major] = process.version.replace('v', '').split('.');
-    if (Number(major) < 12) {
-      throw new Error(
-        `The methods readBigInt64BE, readBigInt64BE, readBigInt64BE, readBigInt64BE are not avilable in your version of nodejs: ${
-          process.version
-        }, you must use v12 or greater`
-      );
-    }
-  }
   int64(varName: string, options?: ParserOptions) {
-    this.bigIntVersionCheck();
-    return this.primitiveN(this.useThisEndian('int64'), varName, options);
+    return this.setNextParser(this.useThisEndian('int64'), varName, options);
   }
   int64be(varName: string, options?: ParserOptions) {
-    this.bigIntVersionCheck();
-    return this.primitiveN('int64be', varName, options);
+    return this.setNextParser('int64be', varName, options);
   }
   int64le(varName: string, options?: ParserOptions) {
-    this.bigIntVersionCheck();
-    return this.primitiveN('int64le', varName, options);
+
+    return this.setNextParser('int64le', varName, options);
   }
 
   uint64(varName: string, options?: ParserOptions) {
-    this.bigIntVersionCheck();
-    return this.primitiveN(this.useThisEndian('uint64'), varName, options);
+    return this.setNextParser(this.useThisEndian('uint64'), varName, options);
   }
   uint64be(varName: string, options?: ParserOptions) {
-    this.bigIntVersionCheck();
-    return this.primitiveN('uint64be', varName, options);
+    return this.setNextParser('uint64be', varName, options);
   }
   uint64le(varName: string, options?: ParserOptions) {
-    this.bigIntVersionCheck();
-    return this.primitiveN('uint64le', varName, options);
+    return this.setNextParser('uint64le', varName, options);
   }
 
   floatle(varName: string, options?: ParserOptions) {
@@ -592,9 +587,9 @@ export class Parser {
     }
 
     if (this.alias) {
-      ctx.pushCode(`return ${FUNCTION_PREFIX + this.alias}(0).result;`);
+      ctx.pushCode(`return ${FUNCTION_PREFIX + this.alias}(0);`);
     } else {
-      ctx.pushCode('return vars;');
+      ctx.pushCode('return { offset: offset, result: vars };');
     }
 
     return ctx.code;
@@ -613,7 +608,7 @@ export class Parser {
 
     this.resolveReferences(ctx);
 
-    ctx.pushCode('return vars;');
+    ctx.pushCode('return { offset: offset, result: vars };');
   }
 
   private addAliasedCode(ctx: Context) {
@@ -646,7 +641,7 @@ export class Parser {
   }
 
   compile() {
-    const src = '(function(buffer, constructorFn) { ' + this.getCode() + ' })';
+    const src = '(function(buffer, constructorFn, Long) { ' + this.getCode() + ' })';
     this.compiled = runInNewContext(src, { Buffer });
   }
 
@@ -707,7 +702,7 @@ export class Parser {
       this.compile();
     }
 
-    return this.compiled(buffer, this.constructorFn);
+    return this.compiled(buffer, this.constructorFn, Long);
   }
 
   private setNextParser(type: Types, varName: string, options: ParserOptions) {
@@ -742,15 +737,24 @@ export class Parser {
         case 'int16be':
         case 'int32le':
         case 'int32be':
-        case 'int64be':
-        case 'int64le':
-        case 'uint64be':
-        case 'uint64le':
+
         case 'floatle':
         case 'floatbe':
         case 'doublele':
         case 'doublebe':
           this.primitiveGenerateN(this.type, ctx);
+          break;
+        case 'int64be':
+          this.generateInt64(ctx, false, false);
+          break;
+        case 'int64le':
+          this.generateInt64(ctx, false, true);
+          break;
+        case 'uint64be':
+          this.generateInt64(ctx, true, false);
+          break;
+        case 'uint64le':
+          this.generateInt64(ctx, true, true);
           break;
         case 'bit':
           this.generateBit(ctx);
@@ -827,6 +831,16 @@ export class Parser {
 
     return ctx;
   }
+
+  private generateInt64(ctx: Context, unsigned:boolean, endianness:boolean) {
+    // TODO find better method to handle nested bit fields
+    const parser = JSON.parse(JSON.stringify(this));
+    parser.varName = ctx.generateVariable(parser.varName);
+
+    ctx.pushCode(`${parser.varName} = Long.fromBytes(buffer(offset, offset+8), ${unsigned}, ${endianness}).toNumber()`)
+    ctx.pushCode(`offset += 8`)
+  }
+
 
   private generateBit(ctx: Context) {
     // TODO find better method to handle nested bit fields
