@@ -27,7 +27,7 @@
   },
   "scripts": {
     "test": "jest",
-    "lint": "eslint lib example test/*.js",
+    "lint": "eslint --ext .js,.ts  lib example test",
     "build:types": "tsc",
     "build": "babel lib -d dist",
     "test-webpack": "webpack --config test/browser/webpack.config.js && node test/browser/run-puppeteer.js"

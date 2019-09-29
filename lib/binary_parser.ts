@@ -3,7 +3,10 @@ import { runInNewContext } from 'vm';
 import { Context } from './context';
 import Long from 'long'
 
+
+//@ts-ignore
 if (typeof window !== "undefined") window.Buffer = Buffer;
+//@ts-ignore
 if (typeof self !== "undefined") self.Buffer = Buffer; // this is for webworker, and also is not an elseif to avoid window polyfills in webworker
 
 
@@ -701,7 +704,6 @@ export class Parser {
     if (!this.compiled) {
       this.compile();
     }
-    console.log(this.compiled,this.getCode())
 
     return this.compiled(buffer, this.constructorFn, Long);
   }
