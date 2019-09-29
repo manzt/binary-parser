@@ -1,6 +1,5 @@
 var assert = require('assert');
-var Parser = require('../dist/binary_parser').Parser;
-var Long = require('long');
+var Parser = require('../lib/binary_parser').Parser;
 
 describe('Primitive parser', function() {
   describe('Primitive parsers', function() {
@@ -8,7 +7,7 @@ describe('Primitive parser', function() {
       var parser = Parser.start();
 
       var buffer = Buffer.from([0xa, 0x14, 0x1e, 0x28, 0x32]);
-      assert.deepEqual(parser.parse(buffer), {});
+      assert.deepEqual(parser.parse(buffer).result, {});
     });
     it('should parse integer types', function() {
       var parser = Parser.start()
@@ -17,93 +16,32 @@ describe('Primitive parser', function() {
         .uint32be('c');
 
       var buffer = Buffer.from([0x00, 0xd2, 0x04, 0x00, 0xbc, 0x61, 0x4e]);
-      assert.deepEqual(parser.parse(buffer), { a: 0, b: 1234, c: 12345678 });
+      assert.deepEqual(parser.parse(buffer), {
+        result: {
+          a: 0,
+          b: 1234,
+          c: 12345678,
+        },
+        offset: 7,
+      });
     });
-    describe('Long.fromString64 parsers', () => {
-      const [major] = process.version.replace('v', '').split('.');
-      if (Number(major) >= 12) {
-        it('should parse biguints64', () => {
-          const parser = Parser.start()
-            .uint64be('a')
-            .uint64le('b');
-          // from https://nodejs.org/api/buffer.html#buffer_buf_readbiguint64le_offset
-          const buf = Buffer.from([
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0xff,
-            0xff,
-            0xff,
-            0xff,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0xff,
-            0xff,
-            0xff,
-            0xff,
-          ]);
-          assert.deepEqual(parser.parse(buf), {
-            a: Long.fromString('4294967295'),
-            b: Long.fromString('18446744069414584320'),
-          });
-        });
+    it('should parse 64bit types', function() {
+      var parser = Parser.start().uint64('a');
+      //  .int64("b")
 
-        it('should parse bigints64', () => {
-          const parser = Parser.start()
-            .int64be('a')
-            .int64le('b')
-            .int64be('c')
-            .int64le('d');
-          // from https://nodejs.org/api/buffer.html#buffer_buf_readbiguint64le_offset
-          const buf = Buffer.from([
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0xff,
-            0xff,
-            0xff,
-            0xff,
-            0x01,
-            0x00,
-            0x00,
-            0x00,
-            0xff,
-            0xff,
-            0xff,
-            0xff,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0xff,
-            0xff,
-            0xff,
-            0xff,
-            0x01,
-            0x00,
-            0x00,
-            0x00,
-            0xff,
-            0xff,
-            0xff,
-            0xff,
-          ]);
-          assert.deepEqual(parser.parse(buf), {
-            a: Long.fromString('4294967295'),
-            b: Long.fromString('-4294967295'),
-            c: Long.fromString('4294967295'),
-            d: Long.fromString('-4294967295'),
-          });
-        });
-      } else {
-        it('should throw when run under not v12', () => {
-          assert.throws(() => Parser.start().bigint64('a'));
-        });
-      }
+      var buffer = Buffer.from([
+        0xff,
+        0xff,
+        0xff,
+        0xff,
+        0xff,
+        0xff,
+        0x00,
+        0x00,
+      ]);
+      assert.deepEqual(parser.parse(buffer).result, {
+        a: 281474976710655,
+      });
     });
     it('should use formatter to transform parsed integer', function() {
       var parser = Parser.start()
@@ -119,7 +57,7 @@ describe('Primitive parser', function() {
         });
 
       var buffer = Buffer.from([0x01, 0xd2, 0x04]);
-      assert.deepEqual(parser.parse(buffer), { a: 2, b: 'test1234' });
+      assert.deepEqual(parser.parse(buffer).result, { a: 2, b: 'test1234' });
     });
     it('should parse floating point types', function() {
       var parser = Parser.start()
@@ -141,7 +79,7 @@ describe('Primitive parser', function() {
         0xb1,
         0xbf,
       ]);
-      var result = parser.parse(buffer);
+      var result = parser.parse(buffer).result;
 
       assert(Math.abs(result.a - 12.345) < FLT_EPSILON);
       assert(Math.abs(result.b - -0.0678) < FLT_EPSILON);
@@ -161,15 +99,15 @@ describe('Primitive parser', function() {
         0x61,
         0x4e,
       ]);
-      assert.deepEqual(parser.parse(buffer), {
+      assert.deepEqual(parser.parse(buffer).result, {
         little: 12345678,
         big: 12345678,
       });
     });
-    it('should seek offset', function() {
+    it('should skip when specified', function() {
       var parser = Parser.start()
         .uint8('a')
-        .seek(3)
+        .skip(3)
         .uint16le('b')
         .uint32be('c');
 
@@ -185,7 +123,11 @@ describe('Primitive parser', function() {
         0x61,
         0x4e,
       ]);
-      assert.deepEqual(parser.parse(buffer), { a: 0, b: 1234, c: 12345678 });
+      assert.deepEqual(parser.parse(buffer).result, {
+        a: 0,
+        b: 1234,
+        c: 12345678,
+      });
     });
   });
 
@@ -212,13 +154,14 @@ describe('Primitive parser', function() {
 
     it('should parse 1-byte-length bit field sequence', function() {
       var parser = new Parser()
+        .endianess('big')
         .bit1('a')
         .bit2('b')
         .bit4('c')
         .bit1('d');
 
       var buf = binaryLiteral('1 10 1010 0');
-      assert.deepEqual(parser.parse(buf), {
+      assert.deepEqual(parser.parse(buf).result, {
         a: 1,
         b: 2,
         c: 10,
@@ -232,7 +175,7 @@ describe('Primitive parser', function() {
         .bit4('c')
         .bit1('d');
 
-      assert.deepEqual(parser.parse(buf), {
+      assert.deepEqual(parser.parse(buf).result, {
         a: 0,
         b: 2,
         c: 10,
@@ -241,12 +184,13 @@ describe('Primitive parser', function() {
     });
     it('should parse 2-byte-length bit field sequence', function() {
       var parser = new Parser()
+        .endianess('big')
         .bit3('a')
         .bit9('b')
         .bit4('c');
 
       var buf = binaryLiteral('101 111000111 0111');
-      assert.deepEqual(parser.parse(buf), {
+      assert.deepEqual(parser.parse(buf).result, {
         a: 5,
         b: 455,
         c: 7,
@@ -257,7 +201,7 @@ describe('Primitive parser', function() {
         .bit3('a')
         .bit9('b')
         .bit4('c');
-      assert.deepEqual(parser.parse(buf), {
+      assert.deepEqual(parser.parse(buf).result, {
         a: 7,
         b: 398,
         c: 11,
@@ -265,13 +209,14 @@ describe('Primitive parser', function() {
     });
     it('should parse 4-byte-length bit field sequence', function() {
       var parser = new Parser()
+        .endianess('big')
         .bit1('a')
         .bit24('b')
         .bit4('c')
         .bit2('d')
         .bit1('e');
       var buf = binaryLiteral('1 101010101010101010101010 1111 01 1');
-      assert.deepEqual(parser.parse(buf), {
+      assert.deepEqual(parser.parse(buf).result, {
         a: 1,
         b: 11184810,
         c: 15,
@@ -286,7 +231,7 @@ describe('Primitive parser', function() {
         .bit4('c')
         .bit2('d')
         .bit1('e');
-      assert.deepEqual(parser.parse(buf), {
+      assert.deepEqual(parser.parse(buf).result, {
         a: 1,
         b: 11184829,
         c: 10,
@@ -297,6 +242,7 @@ describe('Primitive parser', function() {
     it('should parse nested bit fields', function() {
       var parser = new Parser().bit1('a').nest('x', {
         type: new Parser()
+          .endianess('big')
           .bit2('b')
           .bit4('c')
           .bit1('d'),
@@ -304,7 +250,7 @@ describe('Primitive parser', function() {
 
       var buf = binaryLiteral('11010100');
 
-      assert.deepEqual(parser.parse(buf), {
+      assert.deepEqual(parser.parse(buf).result, {
         a: 1,
         x: {
           b: 2,
@@ -324,7 +270,7 @@ describe('Primitive parser', function() {
         encoding: 'ascii',
       });
 
-      assert.equal(parser.parse(buffer).msg, text);
+      assert.equal(parser.parse(buffer).result.msg, text);
     });
     it('should parse UTF8 encoded string', function() {
       var text = 'こんにちは、せかい。';
@@ -334,7 +280,7 @@ describe('Primitive parser', function() {
         encoding: 'utf8',
       });
 
-      assert.equal(parser.parse(buffer).msg, text);
+      assert.equal(parser.parse(buffer).result.msg, text);
     });
     it('should parse HEX encoded string', function() {
       var text = 'cafebabe';
@@ -344,7 +290,7 @@ describe('Primitive parser', function() {
         encoding: 'hex',
       });
 
-      assert.equal(parser.parse(buffer).msg, text);
+      assert.equal(parser.parse(buffer).result.msg, text);
     });
     it('should parse variable length string', function() {
       var buffer = Buffer.from('0c68656c6c6f2c20776f726c64', 'hex');
@@ -352,7 +298,7 @@ describe('Primitive parser', function() {
         .uint8('length')
         .string('msg', { length: 'length', encoding: 'utf8' });
 
-      assert.equal(parser.parse(buffer).msg, 'hello, world');
+      assert.equal(parser.parse(buffer).result.msg, 'hello, world');
     });
     it('should parse zero terminated string', function() {
       var buffer = Buffer.from('68656c6c6f2c20776f726c6400', 'hex');
@@ -361,7 +307,7 @@ describe('Primitive parser', function() {
         encoding: 'ascii',
       });
 
-      assert.deepEqual(parser.parse(buffer), { msg: 'hello, world' });
+      assert.deepEqual(parser.parse(buffer).result, { msg: 'hello, world' });
     });
     it('should parser zero terminated fixed-length string', function() {
       var buffer = Buffer.from('abc\u0000defghij\u0000');
@@ -370,7 +316,7 @@ describe('Primitive parser', function() {
         .string('b', { length: 5, zeroTerminated: true })
         .string('c', { length: 5, zeroTerminated: true });
 
-      assert.deepEqual(parser.parse(buffer), {
+      assert.deepEqual(parser.parse(buffer).result, {
         a: 'abc',
         b: 'defgh',
         c: 'ij',
@@ -387,14 +333,14 @@ describe('Primitive parser', function() {
         stripNull: true,
       });
 
-      assert.equal(parser1.parse(buffer).str, 'test\u0000\u0000');
-      assert.equal(parser2.parse(buffer).str, 'test');
+      assert.equal(parser1.parse(buffer).result.str, 'test\u0000\u0000');
+      assert.equal(parser2.parse(buffer).result.str, 'test');
     });
     it('should parse string greedily with zero-bytes internally', function() {
       var buffer = Buffer.from('abc\u0000defghij\u0000');
       var parser = Parser.start().string('a', { greedy: true });
 
-      assert.deepEqual(parser.parse(buffer), {
+      assert.deepEqual(parser.parse(buffer).result, {
         a: 'abc\u0000defghij\u0000',
       });
     });
@@ -407,7 +353,7 @@ describe('Primitive parser', function() {
       });
 
       var buf = Buffer.from('deadbeefdeadbeef', 'hex');
-      var result = parser.parse(Buffer.concat([Buffer.from([8]), buf]));
+      var result = parser.parse(Buffer.concat([Buffer.from([8]), buf])).result;
 
       assert.deepEqual(result.raw, buf);
     });
@@ -419,50 +365,10 @@ describe('Primitive parser', function() {
       });
 
       var buf = Buffer.from('deadbeefdeadbeef', 'hex');
-      var result = parser.parse(buf);
+      var result = parser.parse(buf).result;
       assert.deepEqual(result.raw, buf);
       result.raw[0] = 0xff;
       assert.notDeepEqual(result.raw, buf);
-    });
-
-    it('should parse until function returns true when readUntil is function', function() {
-      var parser = new Parser()
-        .endianess('big')
-        .uint8('cmd')
-        .buffer('data', {
-          readUntil: function(item) {
-            return item === 2;
-          },
-        });
-
-      var result = parser.parse(Buffer.from('aa', 'hex'));
-      assert.deepEqual(result, { cmd: 0xaa, data: Buffer.from([]) });
-
-      result = parser.parse(Buffer.from('aabbcc', 'hex'));
-      assert.deepEqual(result, { cmd: 0xaa, data: Buffer.from('bbcc', 'hex') });
-
-      result = parser.parse(Buffer.from('aa02bbcc', 'hex'));
-      assert.deepEqual(result, { cmd: 0xaa, data: Buffer.from([]) });
-
-      result = parser.parse(Buffer.from('aabbcc02', 'hex'));
-      assert.deepEqual(result, { cmd: 0xaa, data: Buffer.from('bbcc', 'hex') });
-
-      result = parser.parse(Buffer.from('aabbcc02dd', 'hex'));
-      assert.deepEqual(result, { cmd: 0xaa, data: Buffer.from('bbcc', 'hex') });
-    });
-
-    // this is a test for testing a fix of a bug, that removed the last byte
-    // of the buffer parser
-    it('should return a buffer with same size', function() {
-      var bufferParser = new Parser().buffer('buf', {
-        readUntil: 'eof',
-        formatter: function(buffer) {
-          return buffer;
-        },
-      });
-
-      var buffer = Buffer.from('John\0Doe\0');
-      assert.deepEqual(bufferParser.parse(buffer), { buf: buffer });
     });
   });
 });
