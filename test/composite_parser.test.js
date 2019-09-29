@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 var assert = require('assert');
 var Parser = require('../lib/binary_parser').Parser;
 

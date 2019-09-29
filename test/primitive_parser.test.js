@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 var assert = require('assert');
 var Parser = require('../lib/binary_parser').Parser;
 
@@ -136,9 +137,9 @@ describe('Primitive parser', function() {
       var i;
       var bytes = [];
 
-      s = s.replace(/\s/g, '');
-      for (i = 0; i < s.length; i += 8) {
-        bytes.push(parseInt(s.slice(i, i + 8), 2));
+      const str = s.replace(/\s/g, '');
+      for (i = 0; i < str.length; i += 8) {
+        bytes.push(parseInt(str.slice(i, i + 8), 2));
       }
 
       return Buffer.from(bytes);

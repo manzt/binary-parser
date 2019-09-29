@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-param-reassign */
 import { Buffer } from 'buffer';
 import { runInNewContext } from 'vm';
 import { Context } from './context';
@@ -176,8 +179,6 @@ export class Parser {
   endian: Endianess = 'le';
   constructorFn: Function | null = null;
   alias: string | null = null;
-
-  constructor() {}
 
   static start() {
     return new Parser();

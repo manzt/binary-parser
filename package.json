@@ -30,7 +30,7 @@
   },
   "scripts": {
     "test": "jest",
-    "lint": "eslint --ext .js,.ts  lib example test",
+    "lint": "eslint --report-unused-disable-directives --max-warnings 0  --ext .js,.ts  lib example test",
     "build:types": "tsc",
     "build": "babel lib -d dist",
     "test-webpack": "webpack --config test/browser/webpack.config.js && node test/browser/run-puppeteer.js"
