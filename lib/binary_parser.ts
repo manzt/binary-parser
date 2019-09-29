@@ -201,12 +201,16 @@ export class Parser {
     return this.setNextParser(type as Types, varName, options);
   }
 
-  itf8(varName: string, options?: ParserOptions) {
-    this.setNextParser('itf8', varName, options);
-  }
-
   private useThisEndian(type: PrimitiveTypesWithoutEndian): PrimitiveTypes {
     return (type + this.endian.toLowerCase()) as PrimitiveTypes;
+  }
+
+  itf8(varName: string, options?: ParserOptions) {
+    return this.setNextParser('itf8', varName, options);
+  }
+
+  ltf8(varName: string, options?: ParserOptions) {
+    return this.setNextParser('ltf8', varName, options);
   }
 
   uint8(varName: string, options?: ParserOptions) {
